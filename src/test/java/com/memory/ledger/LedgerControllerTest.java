@@ -85,7 +85,7 @@ public class LedgerControllerTest {
         request.setTakedTime(2.5f);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDateTime ledgerDate = LocalDate.parse("2024-07-18", formatter).atStartOfDay();
+        LocalDateTime ledgerDate = LocalDate.parse("2024-07-19", formatter).atStartOfDay();//오늘 날짜로
         request.setLedgerDate(ledgerDate);
 
         String url = getBaseUrl() + "/api/v1/time-ledger/record";
