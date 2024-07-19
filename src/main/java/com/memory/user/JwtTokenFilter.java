@@ -32,6 +32,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if(authorizationHeader == null) {
             // 화면 로그인 시 쿠키의 "jwtToken"로 Jwt Token을 전송
             // 쿠키에도 Jwt Token이 없다면 로그인 하지 않은 것으로 간주
+
             if(request.getCookies() == null) {
                 filterChain.doFilter(request, response);
                 return;
@@ -39,7 +40,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
             // 쿠키에서 "jwtToken"을 Key로 가진 쿠키를 찾아서 가져오고 없으면 null return
             Cookie jwtTokenCookie = Arrays.stream(request.getCookies())
-                    .filter(cookie -> cookie.getName().equals("jwtToken"))
+                    .filter(cookie -> cookie.getName().equals("refreshToken"))
                     .findFirst()
                     .orElse(null);
             if(jwtTokenCookie == null) {

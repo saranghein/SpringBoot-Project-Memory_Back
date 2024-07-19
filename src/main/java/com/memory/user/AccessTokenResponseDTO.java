@@ -1,11 +1,17 @@
 package com.memory.user;
 
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 public class AccessTokenResponseDTO {
     private String accessToken;
-    public AccessTokenResponseDTO(String token) {
-        this.accessToken = token;
+    @Builder
+    public AccessTokenResponseDTO(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public static AccessTokenResponseDTO of(String accessToken){
+        return AccessTokenResponseDTO.builder().accessToken(accessToken).build();
     }
 }
