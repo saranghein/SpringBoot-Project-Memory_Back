@@ -17,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,7 +86,7 @@ public class LedgerControllerTest {
         request.setTakedTime(2.5f);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDateTime ledgerDate = LocalDate.parse("2024-07-19", formatter).atStartOfDay();//오늘 날짜로
+        LocalDateTime ledgerDate = LocalDate.parse("2024-07-20", formatter).atStartOfDay();//오늘 날짜로
         request.setLedgerDate(ledgerDate);
 
         String url = getBaseUrl() + "/api/v1/time-ledger/record";
@@ -121,7 +122,50 @@ public class LedgerControllerTest {
         ResponseEntity<LedgerResponse> response = restTemplate.exchange(url, HttpMethod.GET, entity, LedgerResponse.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
+    @Test
+    public void testGetContentsLedger() {
+        LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
 
+        List<Ledger> ledgers = Arrays.asList(
+                Ledger.builder()
+                        .ledgerDate(today)
+                        .emotion("Happy")
+                        .emotionCategory("Positive")
+                        .category("Work")
+                        .contents("Completed project")
+                        .takedTime(2.5f)
+                        .userId("testUser")
+                        .build(),
+                Ledger.builder()
+                        .ledgerDate(today)
+                        .emotion("Sad")
+                        .emotionCategory("Negative")
+                        .category("Personal")
+                        .contents("Had a tough day")
+                        .takedTime(1.0f)
+                        .userId("testUser")
+                        .build()
+        );
+
+        ledgerRepository.saveAll(ledgers);
+
+        String url = getBaseUrl() + "/api/v1/time-ledger/today-records";
+        HttpEntity<?> entity = new HttpEntity<>(createHeaders("testToken"));
+
+        ResponseEntity<LedgerResponse> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                LedgerResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        LedgerResponse responseBody = response.getBody();
+        assertThat(responseBody).isNotNull();
+        assertThat(responseBody.getContentsList()).hasSize(2);
+        assertThat(responseBody.getContentsList()).containsExactlyInAnyOrder("Completed project", "Had a tough day");
+
+    }
     @Test
     public void testDeleteLedgerByRecordId() {
         // LedgerRepository를 사용하여 저장된 Ledger ID를 얻음

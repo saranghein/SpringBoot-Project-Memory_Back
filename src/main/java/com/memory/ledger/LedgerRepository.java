@@ -8,7 +8,6 @@ import java.util.Optional;
 
 
 public interface LedgerRepository extends JpaRepository<Ledger, Long> {
-    List<Ledger> findByLedgerDate(LocalDateTime date);
     List<Ledger> findByLedgerDateAndUserId(LocalDateTime date, String userId);
     Optional<Ledger> findByRecordIdAndUserId(Long recordId, String userId);
 }

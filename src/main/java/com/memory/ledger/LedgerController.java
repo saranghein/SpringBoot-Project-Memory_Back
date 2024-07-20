@@ -30,7 +30,6 @@ public class LedgerController {
 
     }
 
-
     // Constructor for test environment
     public LedgerController(LedgerService ledgerService) {
         this.ledgerService = ledgerService;
@@ -138,6 +137,24 @@ public class LedgerController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
+    @GetMapping("/today-records")
+    public ResponseEntity<LedgerResponse>getContentsLedger(HttpServletRequest request) {
+        try {
+            // userId 검증
+            ResponseEntity<String> userIdResponse = validateTokenAndGetUserId(request);
+            if (userIdResponse.getStatusCode() != HttpStatus.OK) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            String userId = userIdResponse.getBody();
+            LocalDateTime localDate = dateFormat(LocalDateTime.now().toLocalDate().toString());
+            List<Ledger> ledgers = ledgerService.getContentsByUserIdAndDate(userId, localDate);
+            LedgerResponse response = LedgerResponse.fromLedgerList(ledgers);
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
     //특정 record의 시간 가계부 삭제
     @DeleteMapping("/records/{recordId}")
     public ResponseEntity<String> deleteLedgerByRecordId(@PathVariable Long recordId,HttpServletRequest request) {
