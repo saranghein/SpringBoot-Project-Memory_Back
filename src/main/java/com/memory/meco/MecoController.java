@@ -120,9 +120,4 @@ public class MecoController {
     }
 
 
-    //작성했던 ledger의 contents들 불러오기
-    @GetMapping("today-records")
-    ResponseEntity<List<MecoResponse>>getRecords(HttpServletRequest request){
-        return null;//ledger의 api에 작성필요 (같은 서비스를 요청하면 문제 발생하기 때문
-    }
 }
