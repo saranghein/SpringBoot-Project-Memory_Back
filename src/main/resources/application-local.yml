@@ -17,3 +17,5 @@ spring:
         physical_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
+jwt:
+  secret: secret

@@ -78,7 +78,7 @@ public class LedgerControllerTest {
     }
 
     @Test
-    public void testPostLedger() {
+    public void testPostLedger() throws Exception {
         LedgerRequest request = new LedgerRequest();
         request.setEmotion("Happy");
         request.setEmotionCategory("Positive");
@@ -87,19 +87,24 @@ public class LedgerControllerTest {
         request.setTakedTime(2.5f);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDateTime ledgerDate = LocalDate.parse("2024-07-20", formatter).atStartOfDay();//오늘 날짜로
+        LocalDateTime ledgerDate = LocalDate.parse("2024-07-21", formatter).atStartOfDay();//오늘 날짜로
         request.setLedgerDate(ledgerDate);
 
         String url = getBaseUrl() + "/api/v1/time-ledger/record";
         HttpEntity<LedgerRequest> entity = new HttpEntity<>(request, createHeaders("testToken"));
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        // JSON 출력 추가
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonOutput = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+        System.out.println(jsonOutput);
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isEqualTo("저장에 성공했습니다.");
     }
 
     @Test
-    public void testGetLedgerByDate() {
+    public void testGetLedgerByDate() throws Exception {
         String date = "2024-07-01";
         String url = getBaseUrl() + "/api/v1/time-ledger/records/date/" + date;
         HttpEntity<?> entity = new HttpEntity<>(createHeaders("testToken"));
@@ -110,21 +115,31 @@ public class LedgerControllerTest {
                 entity,
                 new ParameterizedTypeReference<List<LedgerResponse>>() {}
         );
+        // JSON 출력 추가
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonOutput = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+        System.out.println(jsonOutput);
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
-    public void testGetLedgerByRecordId() {
+    public void testGetLedgerByRecordId() throws Exception{
         // LedgerRepository를 사용하여 저장된 Ledger ID를 얻음
         Long recordId = ledgerRepository.findAll().get(0).getRecordId();
         String url = getBaseUrl() + "/api/v1/time-ledger/records/" + recordId;
         HttpEntity<?> entity = new HttpEntity<>(createHeaders("testToken"));
 
         ResponseEntity<LedgerResponse> response = restTemplate.exchange(url, HttpMethod.GET, entity, LedgerResponse.class);
+        // JSON 출력 추가
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonOutput = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+        System.out.println(jsonOutput);
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
     @Test
-    public void testGetContentsLedger() {
+    public void testGetContentsLedger() throws Exception{
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
 
         List<Ledger> ledgers = Arrays.asList(
@@ -160,21 +175,31 @@ public class LedgerControllerTest {
                 LedgerResponse.class
         );
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         LedgerResponse responseBody = response.getBody();
+        // JSON 출력 추가
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonOutput = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseBody);
+        System.out.println(jsonOutput);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseBody).isNotNull();
         assertThat(responseBody.getContentsList()).hasSize(2);
         assertThat(responseBody.getContentsList()).containsExactlyInAnyOrder("Completed project", "Had a tough day");
 
     }
     @Test
-    public void testDeleteLedgerByRecordId() {
+    public void testDeleteLedgerByRecordId() throws Exception{
         // LedgerRepository를 사용하여 저장된 Ledger ID를 얻음
         Long recordId = ledgerRepository.findAll().get(0).getRecordId();
         String url = getBaseUrl() + "/api/v1/time-ledger/records/" + recordId;
         HttpEntity<?> entity = new HttpEntity<>(createHeaders("testToken"));
 
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class);
+        // JSON 출력 추가
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonOutput = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+        System.out.println(jsonOutput);
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo("레코드가 성공적으로 삭제되었습니다.");
     }
