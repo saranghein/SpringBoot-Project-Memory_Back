@@ -179,4 +179,19 @@ public class LedgerController {
         }
     }
 
+    @GetMapping("/statistics")
+    public ResponseEntity<StatisticsResponse> getStatistics(HttpServletRequest request) {
+        try {
+            ResponseEntity<String> userIdResponse = validateTokenAndGetUserId(request);
+            if (userIdResponse.getStatusCode() != HttpStatus.OK) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            String userId = userIdResponse.getBody();
+
+            StatisticsResponse statistics = ledgerService.getStatistics(userId);
+            return new ResponseEntity<>(statistics, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }
