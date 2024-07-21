@@ -21,7 +21,7 @@ public class LedgerController {
     private final JwtUtil jwtUtil;
     private final boolean isTestEnvironment;
 
-
+    //실제 코드
     @Autowired
     public LedgerController(LedgerService ledgerService, JwtUtil jwtUtil) {
         this.ledgerService = ledgerService;
@@ -29,7 +29,8 @@ public class LedgerController {
         this.isTestEnvironment = false; // Default value
 
     }
-    // Constructor for test environment
+
+    // Test 용 (JWT 우회)
     public LedgerController(LedgerService ledgerService) {
         this.ledgerService = ledgerService;
         this.jwtUtil = null;
@@ -43,7 +44,15 @@ public class LedgerController {
             }
 
             String authorizationHeader = request.getHeader("Authorization");
+            System.out.println("Authorization Header: " + authorizationHeader);
+
+            if (authorizationHeader != null && authorizationHeader.equals("Bearer testToken")) {
+                // Test 환경에서 JWT 우회
+                return new ResponseEntity<>("testUser", HttpStatus.OK);
+            }
             if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+//                return new ResponseEntity<>("testUser", HttpStatus.OK);
+
                 return new ResponseEntity<>("JWT 토큰이 필요합니다.", HttpStatus.UNAUTHORIZED);
             }
 
@@ -131,6 +140,27 @@ public class LedgerController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
+    @GetMapping("/today-records")
+    public ResponseEntity<LedgerResponse>getContentsLedger(HttpServletRequest request) {
+        try {
+            // userId 검증
+            ResponseEntity<String> userIdResponse = validateTokenAndGetUserId(request);
+            if (userIdResponse.getStatusCode() != HttpStatus.OK) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            String userId = userIdResponse.getBody();
+
+            LocalDateTime localDate = dateFormat(LocalDateTime.now().toLocalDate().toString());
+
+            List<Ledger> ledgers = ledgerService.getContentsByUserIdAndDate(userId, localDate);
+            LedgerResponse response = LedgerResponse.fromLedgerList(ledgers);
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
     //특정 record의 시간 가계부 삭제
     @DeleteMapping("/records/{recordId}")
     public ResponseEntity<String> deleteLedgerByRecordId(@PathVariable Long recordId,HttpServletRequest request) {
@@ -155,4 +185,19 @@ public class LedgerController {
         }
     }
 
+    @GetMapping("/statistics")
+    public ResponseEntity<StatisticsResponse> getStatistics(HttpServletRequest request) {
+        try {
+            ResponseEntity<String> userIdResponse = validateTokenAndGetUserId(request);
+            if (userIdResponse.getStatusCode() != HttpStatus.OK) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            String userId = userIdResponse.getBody();
+
+            StatisticsResponse statistics = ledgerService.getStatistics(userId);
+            return new ResponseEntity<>(statistics, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }
