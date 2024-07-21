@@ -1,5 +1,6 @@
 package com.memory.meco;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.memory.MemoryApplication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,9 +73,9 @@ public class MecoControllerTest {
     }
 
     @Test
-    public void testPostQuestions() {
+    public void testPostQuestions() throws Exception {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDateTime mecoDate = LocalDate.parse("2024-07-20", formatter).atStartOfDay();
+        LocalDateTime mecoDate = LocalDate.parse("2024-07-21", formatter).atStartOfDay();
 
         MecoRequest request =new MecoRequest();
         request.setMecoDate(mecoDate);
@@ -87,14 +88,19 @@ public class MecoControllerTest {
         HttpEntity<MecoRequest> entity = new HttpEntity<>(request, createHeaders("testToken"));
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        // JSON 출력 추가
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonOutput = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+        System.out.println(jsonOutput);
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isEqualTo("저장에 성공했습니다.");
     }
 
     @Test
-    public void testGetAnswersByDate() {
+    public void testGetAnswersByDate() throws Exception{
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDateTime mecoDate = LocalDate.parse("2024-07-19", formatter).atStartOfDay();
+        LocalDateTime mecoDate = LocalDate.parse("2024-07-21", formatter).atStartOfDay();
 
 
         Meco meco = Meco.builder()
@@ -107,7 +113,7 @@ public class MecoControllerTest {
 
         mecoRepository.save(meco);
 
-        String formattedDate = "2024-07-19";
+        String formattedDate = "2024-07-21";
         String url = getBaseUrl() + "/api/v1/meco/questions/" + formattedDate;
         HttpEntity<?> entity = new HttpEntity<>(createHeaders("testToken"));
 
@@ -117,9 +123,14 @@ public class MecoControllerTest {
                 entity,
                 new ParameterizedTypeReference<MecoResponse>() {}
         );
+        MecoResponse responseBody = response.getBody();
+
+        // JSON 출력 추가
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonOutput = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+        System.out.println(jsonOutput);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        MecoResponse responseBody = response.getBody();
         assertThat(responseBody).isNotNull();
         assertThat(responseBody.getQuestions()).containsExactly("Question 1", "Question 2", "Question 3");
         assertThat(responseBody.getAnswers()).containsExactly("Answer 1", "Answer 2", "Answer 3");

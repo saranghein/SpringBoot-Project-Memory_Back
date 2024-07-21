@@ -97,9 +97,10 @@ public class MecoController {
             }
         }
         catch (Exception e) {
-            return new ResponseEntity<>("저장에 실패했습니다.",HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("저장에 실패했습니다.",HttpStatus.NOT_FOUND);
         }
     }
+
     //해당 날짜의 답변들 조회
     @GetMapping("questions/{date}")
     ResponseEntity<MecoResponse>getAnswersByDate(@PathVariable String date, HttpServletRequest request) {
@@ -114,9 +115,11 @@ public class MecoController {
 
             Optional<MecoResponse> mecoAnswers = mecoService.getMecoByDateAndUserId(localDate, userId);
             return mecoAnswers.map(response -> new ResponseEntity<>(response, HttpStatus.OK))
-                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
     }
+
+
     //작성했던 ledger의 contents들 불러오기
     @GetMapping("today-records")
     ResponseEntity<List<MecoResponse>>getRecords(HttpServletRequest request){
