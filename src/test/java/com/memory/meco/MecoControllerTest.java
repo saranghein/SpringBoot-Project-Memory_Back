@@ -2,6 +2,7 @@ package com.memory.meco;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.memory.MemoryApplication;
+import com.memory.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +43,9 @@ public class MecoControllerTest {
         }
 
         @Bean
-        public MecoController mecoController(MecoService mecoService) {
-            return new MecoController(mecoService, new JwtUtil()); // JwtUtil 빈 추가
+        public MecoController mecoController(MecoService mecoService, UserService userService) {
+//            return new MecoController(mecoService, new JwtUtil()); // JwtUtil 빈 추가
+            return new MecoController(mecoService, userService);
         }
 
         @Bean

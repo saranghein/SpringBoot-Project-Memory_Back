@@ -50,6 +50,7 @@ public class UserService {
                 .role(UserRole.ADMIN)
                 .build());
     }
+
     public boolean isDuplicated (String userId){
         return userRepository.existsById(userId);
     }
@@ -85,13 +86,16 @@ public class UserService {
 
         return generateAccessToken(getLoginId(jwtTokenCookie, secretKey));
     }
+
     public String getMyInfo(HttpServletRequest request) {
         User user = getLoginUserByUserId(getLoginId(getTokenFromHeader(request), secretKey));
         return user.getUserName();
     }
+
     public void signOut(HttpServletRequest request) {
         userRepository.deleteById(getLoginId(getTokenFromHeader(request), secretKey));
     }
+
     private String generateRefreshToken(String userId) {
         return generateToken(userId, 1000 * 60 * 60 * 24 * 14);
     }
@@ -122,6 +126,7 @@ public class UserService {
                 .findFirst()
                 .orElse(null)).getValue();
     }
+
     public boolean isTokenInvalid(String token, String secretKey) {
         try {
             Claims claims = getClaims(token, secretKey);
@@ -136,6 +141,7 @@ public class UserService {
             return true;
         }
     }
+
     public String getLoginId(String token, String secretKey) {
         return getClaims(token, secretKey).getSubject();
     }
@@ -145,12 +151,21 @@ public class UserService {
                     .setSigningKey(secretKey.getBytes())
                     .parseClaimsJws(token).getBody();
     }
+
     private static String getTokenFromHeader(HttpServletRequest request) {
         return request.getHeader(HttpHeaders.AUTHORIZATION).split(" ")[1];
     }
 
     public User getLoginUserByUserId(String userId) {
         return userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유저가 없어용 - 토큰"));
+    }
+
+    public String getLoginIdFromRequest(HttpServletRequest request) {
+        String token = getTokenFromHeader(request);
+        if (isTokenInvalid(token, secretKey)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT 토큰이 유효하지 않습니다.");
+        }
+        return getLoginId(token, secretKey);
     }
 
     public ResponseCookie generateResponseCookie(String token, Integer maxAge){
@@ -168,6 +183,7 @@ public class UserService {
         String userId = getLoginId(getTokenFromHeader(request), secretKey);
         return userRepository.findById(userId).get().getAnswers();
     }
+
     @Transactional
     public void updateAnswers(List<String> answers, HttpServletRequest request) {
         String userId = getLoginId(getTokenFromHeader(request), secretKey);

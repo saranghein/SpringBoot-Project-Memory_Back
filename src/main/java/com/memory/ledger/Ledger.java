@@ -1,11 +1,13 @@
 package com.memory.ledger;
 
+import com.memory.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -43,17 +45,17 @@ public class Ledger {
         @Column(nullable = false)
         private String contents;
 
-        @Column(nullable = true)
+        @Column(nullable = false)
         private Float takedTime;
 
-// User 개발 후
-//        @ManyToOne
-//        @JoinColumn(name = "userId", nullable = false)
-//        private Users user;
+        //User 개발 후
+        @ManyToOne
+        @JoinColumn(name = "userId", nullable = false)
+        private User user;
 
-        @Column(name = "userId", nullable = false)
-        private String userId;
+//        @Column(name = "userId", nullable = false)
+//        private String userId;
 
         @Column(nullable = false)
-        private LocalDateTime ledgerDate;
+        private LocalDate ledgerDate;
 }

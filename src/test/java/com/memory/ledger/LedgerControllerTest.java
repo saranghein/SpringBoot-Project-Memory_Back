@@ -2,6 +2,7 @@ package com.memory.ledger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.memory.MemoryApplication;
+import com.memory.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +45,8 @@ public class LedgerControllerTest {
         }
 
         @Bean
-        public LedgerController ledgerController(LedgerService ledgerService) {
-            return new LedgerController(ledgerService);
+        public LedgerController ledgerController(LedgerService ledgerService, UserService userService) {
+            return new LedgerController(ledgerService,userService);
         }
     }
 
