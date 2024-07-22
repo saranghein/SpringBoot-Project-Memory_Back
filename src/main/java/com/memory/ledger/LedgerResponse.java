@@ -1,5 +1,6 @@
 package com.memory.ledger;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL) // null 값을 가진 필드는 JSON에 포함되지 않음
 public class LedgerResponse {
 
     //recordId
@@ -27,7 +29,7 @@ public class LedgerResponse {
     private String contents;
 
     //소요 시간
-    private float takedTime;
+    private Float takedTime;
 
 
     public static LedgerResponse fromLedgerWithId(Ledger ledger) {

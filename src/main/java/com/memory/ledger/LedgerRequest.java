@@ -1,8 +1,10 @@
 package com.memory.ledger;
 
+import com.memory.user.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -10,7 +12,7 @@ import java.time.LocalDateTime;
 public class LedgerRequest {
 
     //날짜
-    private LocalDateTime ledgerDate;
+    private LocalDate ledgerDate;
 
     //감정
     private String emotion;
@@ -27,7 +29,7 @@ public class LedgerRequest {
     //소요 시간
     private float takedTime;
 
-    public Ledger toLedger(String userId) {
+    public Ledger toLedger(User user) {
         return Ledger.builder()
                 .ledgerDate(this.ledgerDate)
                 .emotion(this.emotion)
@@ -35,7 +37,7 @@ public class LedgerRequest {
                 .category(this.category)
                 .contents(this.contents)
                 .takedTime(this.takedTime)
-                .userId(userId)
+                .user(user)//userId
                 .build();
     }
 
