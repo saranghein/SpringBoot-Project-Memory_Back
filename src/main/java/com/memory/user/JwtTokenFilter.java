@@ -2,7 +2,6 @@ package com.memory.user;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,71 +13,53 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 // OncePerRequestFilter : 매번 들어갈 때 마다 체크 해주는 필터
 @RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
-
     private final UserService userService;
-    private final String secretKey;
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-        // Header의 Authorization 값이 비어있으면 => Jwt Token을 전송하지 않음 => 로그인 하지 않음
-        if(authorizationHeader == null) {
-            // 화면 로그인 시 쿠키의 "jwtToken"로 Jwt Token을 전송
-            // 쿠키에도 Jwt Token이 없다면 로그인 하지 않은 것으로 간주
-
-            if(request.getCookies() == null) {
-                filterChain.doFilter(request, response);
+        if (request.getRequestURI().equals("/api/v1/meta-questions") |
+                request.getRequestURI().equals("/api/v1/myPage") |
+                request.getRequestURI().equals("/api/v1/logout") |
+                request.getRequestURI().equals("/api/v1/account")
+        ) {
+            String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+//            System.out.println(authorizationHeader);
+            if (authorizationHeader == null) {
+                // 클라이언트에게 JSON 형식의 에러 메시지 응답
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\": \"token is not sent\"}");
                 return;
             }
-
-            // 쿠키에서 "jwtToken"을 Key로 가진 쿠키를 찾아서 가져오고 없으면 null return
-            Cookie jwtTokenCookie = Arrays.stream(request.getCookies())
-                    .filter(cookie -> cookie.getName().equals("refreshToken"))
-                    .findFirst()
-                    .orElse(null);
-            if(jwtTokenCookie == null) {
-                filterChain.doFilter(request, response);
+            String token = authorizationHeader.split(" ")[1];
+            // 전송받은 Jwt Token이 만료되었으면 => 다음 필터 진행(인증 X)
+            if(userService.isTokenInvalid(token, userService.getSecretKey())) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\": \"token is invalid\"}");
                 return;
             }
-            String jwtToken = jwtTokenCookie.getValue();
-            authorizationHeader = "Bearer " + jwtToken;
-        }
+            // Jwt Token에서 loginId 추출
+            String userId = userService.getLoginId(token, userService.getSecretKey());
 
-        // Header의 Authorization 값이 'Bearer '로 시작하지 않으면 => 잘못된 토큰
-        if(!authorizationHeader.startsWith("Bearer ")) {
+            // 추출한 loginId로 User 찾아오기
+            User loginUser = userService.getLoginUserByUserId(userId);
+
+            // loginUser 정보로 UsernamePasswordAuthenticationToken 발급
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    loginUser.getUserId(), null, List.of(new SimpleGrantedAuthority(loginUser.getRole().name())));
+            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            // 권한 부여
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             filterChain.doFilter(request, response);
-            return;
         }
-
-        // 전송받은 값에서 'Bearer ' 뒷부분(Jwt Token) 추출
-        String token = authorizationHeader.split(" ")[1];
-
-        // 전송받은 Jwt Token이 만료되었으면 => 다음 필터 진행(인증 X)
-        if(userService.isExpired(token, secretKey)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // Jwt Token에서 loginId 추출
-        String userId = userService.getLoginId(token, secretKey);
-
-        // 추출한 loginId로 User 찾아오기
-        User loginUser = userService.getLoginUserByUserId(userId);
-
-        // loginUser 정보로 UsernamePasswordAuthenticationToken 발급
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                loginUser.getUserId(), null, List.of(new SimpleGrantedAuthority(loginUser.getRole().name())));
-        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-        // 권한 부여
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        filterChain.doFilter(request, response);
+        else filterChain.doFilter(request,response);
     }
+
 }
+

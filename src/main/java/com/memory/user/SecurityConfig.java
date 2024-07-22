@@ -27,21 +27,23 @@ public class SecurityConfig {
 
     private final UserService userService;
     @Bean
-    public TestFilter testFilter() {
-        return new TestFilter(userService);
+    public JwtTokenFilter jwtTokenFilter() {
+        return new JwtTokenFilter(userService);
     }
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .httpBasic().disable()
+                .formLogin().disable() //폼 기반 x
+                .httpBasic().disable() //세션 x
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilterBefore(testFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class) // JWT 필터 추가
                 .authorizeRequests()
-                    .requestMatchers("/mypage").authenticated()
-                    .anyRequest().permitAll()
-                .and().build();
+                .requestMatchers("/api/v1/meta-questions", "/api/v1/myPage").authenticated() // 인증이 필요한 URI
+                .anyRequest().permitAll() // 인증이 필요 없는 모든 URI 허용
+                .and()
+                .build();
         }
 //
 //    @Bean

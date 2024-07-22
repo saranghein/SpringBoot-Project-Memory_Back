@@ -1,19 +1,19 @@
 package com.memory.user;
 
+import com.memory.user.dto.LoginRequestDTO;
+import com.memory.user.dto.SignUpRequestDTO;
 import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
-import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -77,13 +77,12 @@ public class UserService {
     public String reissueToken(HttpServletRequest request) {
         //쿠키에서 토큰 꺼내기
         String jwtTokenCookie = getTokenCookie(request);
-        System.out.println(jwtTokenCookie);
+//        System.out.println(jwtTokenCookie);
         if (jwtTokenCookie == null) {
             return null;
         }
-        else if (getClaims(jwtTokenCookie, secretKey) == null){
-            return null;
-        }
+        else if (isTokenInvalid(jwtTokenCookie, secretKey)) return null; // refresh 만료
+
         return generateAccessToken(getLoginId(jwtTokenCookie, secretKey));
     }
     public String getMyInfo(HttpServletRequest request) {
@@ -123,12 +122,17 @@ public class UserService {
                 .findFirst()
                 .orElse(null)).getValue();
     }
-
-
-    public boolean isExpired(String token, String secretKey) {
-        try{
-            return getClaims(token, secretKey).getExpiration().before(new Date());
-        } catch (ExpiredJwtException e){
+    public boolean isTokenInvalid(String token, String secretKey) {
+        try {
+            Claims claims = getClaims(token, secretKey);
+            return claims.getExpiration().before(new Date());
+        } catch (JwtException e) {
+            // JWT 관련 예외 처리
+            System.out.println("JWT processing error: " + e.getMessage());
+            return true;
+        } catch (Exception e) {
+            // 기타 예외 처리
+            System.out.println("Unexpected error: " + e.getMessage());
             return true;
         }
     }
@@ -137,13 +141,9 @@ public class UserService {
     }
 
     private static Claims getClaims(String token, String secretKey) {
-        try {
             return Jwts.parser()
                     .setSigningKey(secretKey.getBytes())
                     .parseClaimsJws(token).getBody();
-        } catch (SignatureException e){
-            return null;
-        }
     }
     private static String getTokenFromHeader(HttpServletRequest request) {
         return request.getHeader(HttpHeaders.AUTHORIZATION).split(" ")[1];
@@ -164,4 +164,13 @@ public class UserService {
                 .build();
     }
 
+    public List<String> getAnswers(HttpServletRequest request) {
+        String userId = getLoginId(getTokenFromHeader(request), secretKey);
+        return userRepository.findById(userId).get().getAnswers();
+    }
+    @Transactional
+    public void updateAnswers(List<String> answers, HttpServletRequest request) {
+        String userId = getLoginId(getTokenFromHeader(request), secretKey);
+        userRepository.updateAnswers(userId, answers);
+    }
 }

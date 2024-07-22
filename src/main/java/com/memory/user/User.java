@@ -1,5 +1,6 @@
 package com.memory.user;
 
+import com.memory.user.dto.SignUpRequestDTO;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

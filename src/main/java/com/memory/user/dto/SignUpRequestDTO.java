@@ -1,4 +1,4 @@
-package com.memory.user;
+package com.memory.user.dto;
 
 import lombok.Getter;
 
