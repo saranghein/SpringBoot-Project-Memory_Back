@@ -97,7 +97,7 @@ public class LedgerController {
             }
         }catch (Exception e){
 
-            return new ResponseEntity<>("저장에 실패했습니다.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("저장에 실패했습니다.", HttpStatus.NOT_FOUND);
         }
     }
 
@@ -121,7 +121,7 @@ public class LedgerController {
             List<LedgerResponse> ledgers = ledgerService.getLedgerByDateAndUserId(localDate, userId);
             return new ResponseEntity<>(ledgers, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -137,7 +137,7 @@ public class LedgerController {
 
         Optional<LedgerResponse> ledgerResponse = ledgerService.getLedgerByRecordIdAndUserId(recordId, userId);
         return ledgerResponse.map(response -> new ResponseEntity<>(response, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/today-records")
@@ -158,7 +158,7 @@ public class LedgerController {
             return new ResponseEntity<>(response, HttpStatus.OK);
 
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
     //특정 record의 시간 가계부 삭제
@@ -175,13 +175,13 @@ public class LedgerController {
             Optional<LedgerResponse> ledgerResponse = ledgerService.getLedgerByRecordIdAndUserId(recordId, userId);
             // recordId에 대한 데이터가 있는지 검사
             if (ledgerResponse.isEmpty()) {
-                return new ResponseEntity<>("레코드를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("레코드를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
             }
 
             ledgerService.deleteLedgerByRecordId(recordId);
             return new ResponseEntity<>("레코드가 성공적으로 삭제되었습니다.", HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("레코드 삭제 중 오류가 발생했습니다.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("레코드 삭제 중 오류가 발생했습니다.", HttpStatus.NOT_FOUND);
         }
     }
 
@@ -197,7 +197,7 @@ public class LedgerController {
             StatisticsResponse statistics = ledgerService.getStatistics(userId);
             return new ResponseEntity<>(statistics, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }
