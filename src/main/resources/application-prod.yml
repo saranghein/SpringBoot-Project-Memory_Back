@@ -4,9 +4,6 @@ spring:
     username: ${MYSQL_DATABASE_USERNAME}
     password: ${MYSQL_DATABASE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-  sql:
-    init:
-      schema-locations: classpath:schema.sql
   jpa:
     hibernate:
       ddl-auto: update
