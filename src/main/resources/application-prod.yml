@@ -1,12 +1,12 @@
 spring:
   datasource:
-    url: ${MYSQL_DATABASE_URL}
+    url: jdbc:mysql://${MYSQL_DATABASE_URL}:3306/memory?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ${MYSQL_DATABASE_USERNAME}
     password: ${MYSQL_DATABASE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
