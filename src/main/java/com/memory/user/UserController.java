@@ -33,7 +33,6 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<AccessTokenResponseDTO> login(@RequestBody LoginRequestDTO requestDTO) {
         List<String> tokens = userService.login(requestDTO);
-        System.out.println(33);
         ResponseCookie refreshTokenCookie = userService.generateResponseCookie(tokens.get(1), 21 * 24 * 60 * 60);
 //        String accessToken = tokens.get(0);
 //        String refreshToken = tokens.get(1);
@@ -44,10 +43,6 @@ public class UserController {
     //accessToken 재발급
     @PostMapping("/accessToken")
     public ResponseEntity<AccessTokenResponseDTO> reissueToken(HttpServletRequest request) {
-//        if (userService.reissueToken(request) == null){
-//            return null;
-//        }
-//        return ResponseEntity.ok(AccessTokenResponseDTO.of(userService.reissueToken(request)));
         return ResponseEntity.of(Optional.ofNullable(userService.reissueToken(request))
                 .map(AccessTokenResponseDTO::of));
     }

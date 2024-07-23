@@ -19,12 +19,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
     private final UserService userService;
+    private final JwtTokenUtil jwtTokenUtil;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (request.getRequestURI().equals("/api/v1/meta-questions") |
                 request.getRequestURI().equals("/api/v1/myPage") |
                 request.getRequestURI().equals("/api/v1/logout") |
-                request.getRequestURI().equals("/api/v1/account")
+                request.getRequestURI().equals("/api/v1/account") |
+                request.getRequestURI().equals("/api/v1/meta-questions") |
+                request.getRequestURI().equals("/api/v1/myPage") |
+                request.getRequestURI().equals("/api/v1/time-ledger/*") |
+                request.getRequestURI().equals("/api/v1/meco/*")
         ) {
             String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 //            System.out.println(authorizationHeader);
@@ -37,14 +42,14 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
             String token = authorizationHeader.split(" ")[1];
             // 전송받은 Jwt Token이 만료되었으면 => 다음 필터 진행(인증 X)
-            if(userService.isTokenInvalid(token, userService.getSecretKey())) {
+            if(userService.isTokenInvalid(token, jwtTokenUtil.getSecretKey())) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.getWriter().write("{\"message\": \"token is invalid\"}");
                 return;
             }
             // Jwt Token에서 loginId 추출
-            String userId = userService.getLoginId(token, userService.getSecretKey());
+            String userId = userService.getLoginId(token, jwtTokenUtil.getSecretKey());
 
             // 추출한 loginId로 User 찾아오기
             User loginUser = userService.getLoginUserByUserId(userId);

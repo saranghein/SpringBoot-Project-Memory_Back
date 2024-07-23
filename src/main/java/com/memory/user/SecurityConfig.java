@@ -26,9 +26,10 @@ import java.io.IOException;
 public class SecurityConfig {
 
     private final UserService userService;
+    private final JwtTokenUtil jwtTokenUtil;
     @Bean
     public JwtTokenFilter jwtTokenFilter() {
-        return new JwtTokenFilter(userService);
+        return new JwtTokenFilter(userService, jwtTokenUtil);
     }
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -40,51 +41,9 @@ public class SecurityConfig {
                 .and()
                 .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class) // JWT 필터 추가
                 .authorizeRequests()
-                .requestMatchers("/api/v1/meta-questions", "/api/v1/myPage").authenticated() // 인증이 필요한 URI
+                .requestMatchers("/api/v1/meta-questions", "/api/v1/myPage", "/api/v1/time-ledger/*", "/api/v1/meco/*").authenticated() // 인증이 필요한 URI
                 .anyRequest().permitAll() // 인증이 필요 없는 모든 URI 허용
                 .and()
                 .build();
         }
-//
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-//        return httpSecurity
-//                .httpBasic().disable()
-//                .csrf().disable()
-//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .addFilterBefore(new JwtTokenFilter(userService, userService.getSecretKey()), UsernamePasswordAuthenticationFilter.class)
-//                .authorizeRequests() // 밑에 requestMatchers 를 인가 확인
-////                .requestMatchers("/api/v1/time-leger").authenticated()
-////                .requestMatchers("/api/v1/meco").authenticated()
-////                .requestMatchers("/api/v1/meta-questions").authenticated()
-////                .requestMatchers("/api/v1/statistics").authenticated()
-//                .requestMatchers("/api/v1/test").authenticated()
-//                .requestMatchers("/jwt-login/admin/**").hasAuthority(UserRole.ADMIN.name())
-//                .anyRequest().permitAll()
-//                .and()
-//                .exceptionHandling()
-//                // 인증 실패
-//                .authenticationEntryPoint(new AuthenticationEntryPoint() {
-//                    @Override
-//                    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException, IOException {
-//                        // jwt-api-login(api)에서 인증에 실패하면 error을 그대로 출력
-//                        // jwt-login(화면)에서 인증에 실패하면 에러 페이지로 redirect
-//                        if (!request.getRequestURI().contains("api")) {
-//                            response.sendRedirect("/jwt-login/authentication-fail");
-//                        }
-//                    }
-//                })
-//                // 인가 실패
-//                .accessDeniedHandler(new AccessDeniedHandler() {
-//                    @Override
-//                    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-//                        if (!request.getRequestURI().contains("api")) {
-//                            response.sendRedirect("/jwt-login/authorization-fail");
-//                        }
-//                    }
-//                })
-//                .and().build();
-//    }
-
 }
