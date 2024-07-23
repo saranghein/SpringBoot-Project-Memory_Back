@@ -84,10 +84,10 @@ public class LedgerService {
                 .collect(Collectors.groupingBy(Ledger::getCategory, Collectors.summingDouble(Ledger::getTakedTime)));
 
         StatisticsResponse.ComparisonWithLastMonth comparisonWithLastMonth = StatisticsResponse.ComparisonWithLastMonth.builder()
-                .previousCategory(previousMonthData.entrySet().stream().max(Map.Entry.comparingByValue(Double::compareTo)).map(Map.Entry::getKey).orElse(null))
+                .previousCategory(previousMonthData.entrySet().stream().max(Map.Entry.comparingByValue(Double::compareTo)).map(Map.Entry::getKey).orElse(""))
                 .previousMonth(startOfPreviousMonth.getMonthValue())
                 .previousHours(previousMonthData.values().stream().max(Double::compareTo).orElse(0.0).floatValue())
-                .currentCategory(currentMonthData.entrySet().stream().max(Map.Entry.comparingByValue(Double::compareTo)).map(Map.Entry::getKey).orElse(null))
+                .currentCategory(currentMonthData.entrySet().stream().max(Map.Entry.comparingByValue(Double::compareTo)).map(Map.Entry::getKey).orElse(""))
                 .currentMonth(startOfCurrentMonth.getMonthValue())
                 .currentHours(currentMonthData.values().stream().max(Double::compareTo).orElse(0.0).floatValue())
                 .build();
