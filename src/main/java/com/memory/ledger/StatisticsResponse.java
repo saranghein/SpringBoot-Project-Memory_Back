@@ -40,6 +40,7 @@ public class StatisticsResponse {
         private String currentCategory;
         private int currentMonth;
         private float currentHours;
+
     }
 
     @Data

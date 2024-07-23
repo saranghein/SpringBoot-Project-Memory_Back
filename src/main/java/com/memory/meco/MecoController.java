@@ -73,7 +73,7 @@ public class MecoController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return LocalDate.parse(date, formatter).atStartOfDay();
     }
-    //질문 작성
+    //질문 작성(작성 날짜 unique)
     @PostMapping("/questions")
     ResponseEntity<String>postQuestions(@RequestBody MecoRequest mecoRequest, HttpServletRequest request) {
         try{
@@ -87,20 +87,20 @@ public class MecoController {
 //            }
 //            String userId = userIdResponse.getBody();
 
-            //LocalDateTime -> LocalDate 변환 필요
             LocalDate todayDate = LocalDate.now();
             LocalDate requestDate = mecoRequest.getMecoDate();
 
 
             // 요청된 날짜와 오늘 날짜가 같다면
-            if (todayDate.isEqual(requestDate)) {
+            if (todayDate.isEqual(requestDate)&&mecoService.getMecoByDateAndUserId(requestDate, user).isEmpty()) {
                 Meco meco = mecoRequest.toMeco(user); // Ledger 객체 생성
                 mecoService.saveMeco(meco);
                 return new ResponseEntity<>("저장에 성공했습니다.", HttpStatus.CREATED);
 
+            } else if (mecoService.getMecoByDateAndUserId(requestDate, user).isPresent()) {
+                return new ResponseEntity<>("해당 날짜는 이미 작성돼 있습니다.", HttpStatus.CONFLICT);
             } else {
                 return new ResponseEntity<>("날짜가 일치하지 않습니다.", HttpStatus.CONFLICT);
-
             }
         }
         catch (Exception e) {
@@ -108,7 +108,7 @@ public class MecoController {
         }
     }
 
-    //해당 날짜의 답변들 조회
+    //해당 날짜의 답변들 조회(날짜 unique하게 처리 필요)
     @GetMapping("questions/{date}")
     ResponseEntity<MecoResponse>getAnswersByDate(@PathVariable LocalDate date, HttpServletRequest request) {
             // userId 검증
