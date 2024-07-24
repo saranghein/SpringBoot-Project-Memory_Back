@@ -2,15 +2,10 @@ package com.memory.user;
 
 import com.memory.user.dto.LoginRequestDTO;
 import com.memory.user.dto.SignUpRequestDTO;
-import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
@@ -20,12 +15,10 @@ import java.util.*;
 
 @RequiredArgsConstructor
 @Service
-@Getter
 public class UserService {
-    private final UserRepository userRepository;
 
-    @Value("${secrete}")
-    String secretKey;
+    private final UserRepository userRepository;
+    private final JwtTokenUtil jwtTokenUtil;
     @PostConstruct
     public void init() {
         userRepository.save(User.builder()
@@ -50,7 +43,6 @@ public class UserService {
                 .role(UserRole.ADMIN)
                 .build());
     }
-
     public boolean isDuplicated (String userId){
         return userRepository.existsById(userId);
     }
@@ -69,107 +61,48 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 틀려요");
         }
 
-        String accessToken = generateAccessToken(requestDTO.getUserId());
-        String refreshToken = generateRefreshToken(requestDTO.getUserId());
+        String accessToken = jwtTokenUtil.generateAccessToken(requestDTO.getUserId());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(requestDTO.getUserId());
 
         return new ArrayList<>(Arrays.asList(accessToken, refreshToken));
     }
 
     public String reissueToken(HttpServletRequest request) {
         //쿠키에서 토큰 꺼내기
-        String jwtTokenCookie = getTokenCookie(request);
+        String jwtTokenCookie = jwtTokenUtil.getTokenCookie(request);
 //        System.out.println(jwtTokenCookie);
         if (jwtTokenCookie == null) {
             return null;
         }
-        else if (isTokenInvalid(jwtTokenCookie, secretKey)) return null; // refresh 만료
-
-        return generateAccessToken(getLoginId(jwtTokenCookie, secretKey));
+        if (isTokenInvalid(jwtTokenCookie, jwtTokenUtil.getSecretKey())) return null;
+        return jwtTokenUtil.generateAccessToken(getLoginId(jwtTokenCookie, jwtTokenUtil.getSecretKey()));
     }
-
+    public boolean isTokenInvalid(String token, String secretKey) {
+        return jwtTokenUtil.isTokenInvalid(token, secretKey);
+    }
     public String getMyInfo(HttpServletRequest request) {
-        User user = getLoginUserByUserId(getLoginId(getTokenFromHeader(request), secretKey));
+        User user = getLoginUserByUserId(getLoginId(jwtTokenUtil.getTokenFromHeader(request), jwtTokenUtil.getSecretKey()));
         return user.getUserName();
     }
-
     public void signOut(HttpServletRequest request) {
-        userRepository.deleteById(getLoginId(getTokenFromHeader(request), secretKey));
+        userRepository.deleteById(getLoginId(jwtTokenUtil.getTokenFromHeader(request), jwtTokenUtil.getSecretKey()));
     }
-
-    private String generateRefreshToken(String userId) {
-        return generateToken(userId, 1000 * 60 * 60 * 24 * 14);
+    public List<String> getAnswers(HttpServletRequest request) {
+        String userId = getLoginId(jwtTokenUtil.getTokenFromHeader(request), jwtTokenUtil.getSecretKey());
+        return userRepository.findById(userId).get().getAnswers();
     }
-
-    private String generateAccessToken(String userId) {
-        return generateToken(userId, 1000 * 60 * 60);
+    @Transactional
+    public void updateAnswers(List<String> answers, HttpServletRequest request) {
+        String userId = getLoginId(jwtTokenUtil.getTokenFromHeader(request), jwtTokenUtil.getSecretKey());
+        userRepository.updateAnswers(userId, answers);
     }
-
-    public String generateToken(String userId, long expirationTime) {
-        Claims claims = Jwts.claims(); // jwt 라이브러리 claim 메서드 claim 을 만드는 것으로 보임
-        claims.setSubject(userId); // 입력받은 loginid을 claim에 추가
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(new Date(System.currentTimeMillis())) // 발생 시간
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime)) // 만료 시간인듯
-                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes()) // 서명하는 부분 서명은 안전한 토큰이란 걸 나타내고 이 서명을 할 수 있게 해주느 것이 비밀키임
-                .compact();
-    }
-
-    private static String getTokenCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        // 쿠키가 없는 경우 빈 문자열을 반환
-        if (cookies == null) {
-            return null;
-        }
-        return Objects.requireNonNull(Arrays.stream(cookies)
-                .filter(cookie -> cookie.getName().equals("refreshToken"))
-                .findFirst()
-                .orElse(null)).getValue();
-    }
-
-    public boolean isTokenInvalid(String token, String secretKey) {
-        try {
-            Claims claims = getClaims(token, secretKey);
-            return claims.getExpiration().before(new Date());
-        } catch (JwtException e) {
-            // JWT 관련 예외 처리
-            System.out.println("JWT processing error: " + e.getMessage());
-            return true;
-        } catch (Exception e) {
-            // 기타 예외 처리
-            System.out.println("Unexpected error: " + e.getMessage());
-            return true;
-        }
-    }
-
     public String getLoginId(String token, String secretKey) {
-        return getClaims(token, secretKey).getSubject();
+        return jwtTokenUtil.getClaims(token, secretKey).getSubject();
     }
-
-    private static Claims getClaims(String token, String secretKey) {
-            return Jwts.parser()
-                    .setSigningKey(secretKey.getBytes())
-                    .parseClaimsJws(token).getBody();
-    }
-
-    private static String getTokenFromHeader(HttpServletRequest request) {
-        return request.getHeader(HttpHeaders.AUTHORIZATION).split(" ")[1];
-    }
-
     public User getLoginUserByUserId(String userId) {
         return userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유저가 없어용 - 토큰"));
     }
-
-    public String getLoginIdFromRequest(HttpServletRequest request) {
-        String token = getTokenFromHeader(request);
-        if (isTokenInvalid(token, secretKey)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT 토큰이 유효하지 않습니다.");
-        }
-        return getLoginId(token, secretKey);
-    }
-
     public ResponseCookie generateResponseCookie(String token, Integer maxAge){
-
         return ResponseCookie.from("refreshToken", token)
                 .httpOnly(true)
                 .secure(true) // https 사용시
@@ -179,14 +112,8 @@ public class UserService {
                 .build();
     }
 
-    public List<String> getAnswers(HttpServletRequest request) {
-        String userId = getLoginId(getTokenFromHeader(request), secretKey);
-        return userRepository.findById(userId).get().getAnswers();
-    }
-
-    @Transactional
-    public void updateAnswers(List<String> answers, HttpServletRequest request) {
-        String userId = getLoginId(getTokenFromHeader(request), secretKey);
-        userRepository.updateAnswers(userId, answers);
+    public String getLoginIdFromRequest(HttpServletRequest request) {
+        String token = jwtTokenUtil.getTokenFromHeader(request);
+        return getLoginId(token, jwtTokenUtil.getSecretKey());
     }
 }
