@@ -3,6 +3,7 @@ package com.memory.user;
 import com.memory.user.dto.SignUpRequestDTO;
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 @Entity
+@Table(name = "users")
+@Data
 @Getter
 @NoArgsConstructor
 public class User {
