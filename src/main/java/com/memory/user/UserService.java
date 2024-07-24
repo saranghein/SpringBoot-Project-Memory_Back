@@ -112,4 +112,8 @@ public class UserService {
                 .build();
     }
 
+    public String getLoginIdFromRequest(HttpServletRequest request) {
+        String token = jwtTokenUtil.getTokenFromHeader(request);
+        return getLoginId(token, jwtTokenUtil.getSecretKey());
+    }
 }
