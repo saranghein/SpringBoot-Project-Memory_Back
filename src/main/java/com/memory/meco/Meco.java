@@ -1,11 +1,13 @@
 package com.memory.meco;
 
+import com.memory.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,15 +23,15 @@ public class Meco {
     private Long mecoId;
 
     // User 개발 후
-//        @ManyToOne
-//        @JoinColumn(name = "userId", nullable = false)
-//        private Users user;
+    @ManyToOne
+    @JoinColumn(name = "userId", nullable = false)
+    private User user;
 
-    @Column(name = "userId", nullable = false)
-    private String userId;
+//    @Column(name = "userId", nullable = false)
+//    private String userId;
 
-    @Column(nullable = true)
-    private LocalDateTime mecoDate;
+    @Column(nullable = true,unique = true)
+    private LocalDate mecoDate;
 
     @Column(nullable = true)
     private String contents;

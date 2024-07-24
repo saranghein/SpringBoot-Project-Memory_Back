@@ -1,10 +1,10 @@
 package com.memory.ledger;
 
+import com.memory.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.Month;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,32 +23,32 @@ public class LedgerService {
     }
 
 
-    public List<LedgerResponse> getLedgerByDateAndUserId(LocalDateTime date, String userId) {
-        List<Ledger> ledgers = ledgerRepository.findByLedgerDateAndUserId(date, userId);
+    public List<LedgerResponse> getLedgerByDateAndUserId(LocalDate date, User user) {
+        List<Ledger> ledgers = ledgerRepository.findByLedgerDateAndUser(date, user);
         return ledgers.stream()
                 .map(LedgerResponse::fromLedgerWithId)
                 .collect(Collectors.toList());
     }
 
-    public Optional<LedgerResponse> getLedgerByRecordIdAndUserId(Long recordId, String userId) {
-        return ledgerRepository.findByRecordIdAndUserId(recordId, userId)
+    public Optional<LedgerResponse> getLedgerByRecordIdAndUserId(Long recordId, User user) {
+        return ledgerRepository.findByRecordIdAndUser(recordId, user)
                 .map(LedgerResponse::fromLedger);
     }
 
-    public List<Ledger> getContentsByUserIdAndDate(String userId, LocalDateTime date) {
-        return ledgerRepository.findByLedgerDateAndUserId(date, userId);
+    public List<Ledger> getContentsByUserIdAndDate(User user, LocalDate date) {
+        return ledgerRepository.findByLedgerDateAndUser(date, user);
     }
 
     public void deleteLedgerByRecordId(Long recordId) {
         ledgerRepository.deleteById(recordId);
     }
 
-    public StatisticsResponse getStatistics(String userId) {
-        List<Ledger> ledgers = ledgerRepository.findByUserId(userId);
+    public StatisticsResponse getStatistics(User user) {
+        List<Ledger> ledgers = ledgerRepository.findByUser(user);
 
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startOfCurrentMonth = now.withDayOfMonth(1).toLocalDate().atStartOfDay();
-        LocalDateTime startOfPreviousMonth = startOfCurrentMonth.minusMonths(1);
+        LocalDate now = LocalDate.now();
+        LocalDate startOfCurrentMonth = now.withDayOfMonth(1);
+        LocalDate startOfPreviousMonth = startOfCurrentMonth.minusMonths(1);
 
         // 이번 달 데이터 필터링
         List<Ledger> currentMonthLedgers = ledgers.stream()
@@ -84,10 +84,10 @@ public class LedgerService {
                 .collect(Collectors.groupingBy(Ledger::getCategory, Collectors.summingDouble(Ledger::getTakedTime)));
 
         StatisticsResponse.ComparisonWithLastMonth comparisonWithLastMonth = StatisticsResponse.ComparisonWithLastMonth.builder()
-                .previousCategory(previousMonthData.entrySet().stream().max(Map.Entry.comparingByValue(Double::compareTo)).map(Map.Entry::getKey).orElse(null))
+                .previousCategory(previousMonthData.entrySet().stream().max(Map.Entry.comparingByValue(Double::compareTo)).map(Map.Entry::getKey).orElse(""))
                 .previousMonth(startOfPreviousMonth.getMonthValue())
                 .previousHours(previousMonthData.values().stream().max(Double::compareTo).orElse(0.0).floatValue())
-                .currentCategory(currentMonthData.entrySet().stream().max(Map.Entry.comparingByValue(Double::compareTo)).map(Map.Entry::getKey).orElse(null))
+                .currentCategory(currentMonthData.entrySet().stream().max(Map.Entry.comparingByValue(Double::compareTo)).map(Map.Entry::getKey).orElse(""))
                 .currentMonth(startOfCurrentMonth.getMonthValue())
                 .currentHours(currentMonthData.values().stream().max(Double::compareTo).orElse(0.0).floatValue())
                 .build();

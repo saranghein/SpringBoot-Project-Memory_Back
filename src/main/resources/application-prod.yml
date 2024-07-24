@@ -1,11 +1,8 @@
 spring:
-  config:
-    activate:
-      on-profile: local
   datasource:
-    url: jdbc:mysql://memory.c7q0ggcaw894.ap-northeast-2.rds.amazonaws.com/memory
-    username: root
-    password: 12341234
+    url: ${MYSQL_DATABASE_URL}
+    username: ${MYSQL_DATABASE_USERNAME}
+    password: ${MYSQL_DATABASE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
