@@ -109,7 +109,7 @@ public class MecoController {
     }
 
     //해당 날짜의 답변들 조회(날짜 unique하게 처리 필요)
-    @GetMapping("questions/{date}")
+    @GetMapping("/questions/{date}")
     ResponseEntity<MecoResponse>getAnswersByDate(@PathVariable LocalDate date, HttpServletRequest request) {
             // userId 검증
             String userId=userService.getLoginIdFromRequest(request);
