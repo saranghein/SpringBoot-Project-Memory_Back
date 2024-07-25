@@ -22,14 +22,14 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getRequestURI().equals("/api/v1/meta-questions") |
-                request.getRequestURI().equals("/api/v1/myPage") |
-                request.getRequestURI().equals("/api/v1/logout") |
-                request.getRequestURI().equals("/api/v1/account") |
-                request.getRequestURI().equals("/api/v1/meta-questions") |
-                request.getRequestURI().equals("/api/v1/myPage") |
-                request.getRequestURI().equals("/api/v1/time-ledger/*") |
-                request.getRequestURI().equals("/api/v1/meco/*")
+        if (request.getRequestURI().matches("/api/v1/meta-questions") ||
+                request.getRequestURI().matches("/api/v1/myPage") ||
+                request.getRequestURI().matches("/api/v1/logout") ||
+                request.getRequestURI().matches("/api/v1/account") ||
+                request.getRequestURI().matches("/api/v1/meta-questions") ||
+                request.getRequestURI().matches("/api/v1/myPage") ||
+                request.getRequestURI().matches("/api/v1/time-ledger/.*") ||
+                request.getRequestURI().matches("/api/v1/meco/.*")
         ) {
             String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 //            System.out.println(authorizationHeader);
