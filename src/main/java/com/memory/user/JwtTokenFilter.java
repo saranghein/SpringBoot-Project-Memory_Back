@@ -28,8 +28,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 request.getRequestURI().equals("/api/v1/account") |
                 request.getRequestURI().equals("/api/v1/meta-questions") |
                 request.getRequestURI().equals("/api/v1/myPage") |
-                request.getRequestURI().equals("/api/v1/time-ledger/*") |
-                request.getRequestURI().equals("/api/v1/meco/*")
+                request.getRequestURI().matches("/api/v1/time-ledger/.*") |
+                request.getRequestURI().matches("/api/v1/meco/.*")
         ) {
             String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 //            System.out.println(authorizationHeader);
