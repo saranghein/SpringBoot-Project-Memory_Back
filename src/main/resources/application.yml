@@ -4,10 +4,10 @@ spring:
 ---
 spring:
   datasource:
-    driver-class-name: org.h2.Driver
-    url: 'jdbc:h2:~/test;NON_KEYWORDS=USER'
-    username: sa
-    password:
+    url: jdbc:mysql://localhost:3306/memory-schema?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: memory-user
+    password: memory*1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
   h2:
     console:
       enabled: true
@@ -22,8 +22,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
-        naming:
-          physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        dialect: org.hibernate.dialect.MySQLDialect
 
 secrete: likelion
