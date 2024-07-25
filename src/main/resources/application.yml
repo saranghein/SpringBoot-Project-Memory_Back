@@ -4,9 +4,9 @@ spring:
 ---
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/memory-schema?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: memory-user
-    password: memory*1234
+    url: jdbc:mysql://memory.c7q0ggcaw894.ap-northeast-2.rds.amazonaws.com/memory
+    username: root
+    password: 12341234
     driver-class-name: com.mysql.cj.jdbc.Driver
   h2:
     console:

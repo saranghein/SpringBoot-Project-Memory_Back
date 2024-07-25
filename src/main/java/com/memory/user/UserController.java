@@ -31,14 +31,14 @@ public class UserController {
     }
     //로그인
     @PostMapping("/login")
-    public ResponseEntity<AccessTokenResponseDTO> login(@RequestBody LoginRequestDTO requestDTO) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO requestDTO) {
         List<String> tokens = userService.login(requestDTO);
         ResponseCookie refreshTokenCookie = userService.generateResponseCookie(tokens.get(1), 21 * 24 * 60 * 60);
 //        String accessToken = tokens.get(0);
 //        String refreshToken = tokens.get(1);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                .body(AccessTokenResponseDTO.of(tokens.get(0)));
+                .body(LoginResponseDTO.of(tokens.get(0), userService.findNameById(requestDTO.getUserId())));
     }
     //accessToken 재발급
     @PostMapping("/accessToken")

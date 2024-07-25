@@ -116,4 +116,9 @@ public class UserService {
         String token = jwtTokenUtil.getTokenFromHeader(request);
         return getLoginId(token, jwtTokenUtil.getSecretKey());
     }
+
+    public String findNameById(String userId) {
+        Optional<User> loginUser = userRepository.findById(userId);
+        return loginUser.map(User::getUserName).orElse(null);
+    }
 }
