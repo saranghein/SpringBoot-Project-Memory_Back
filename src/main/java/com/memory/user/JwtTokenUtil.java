@@ -74,8 +74,4 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-
-
-
-
 }
