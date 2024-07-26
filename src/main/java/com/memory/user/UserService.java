@@ -19,31 +19,33 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final JwtTokenUtil jwtTokenUtil;
+
     @PostConstruct
     public void init() {
         userRepository.save(User.builder()
                 .userName("dd")
                 .userId("dd")
                 .userPw("sdd")
-                .answers(new ArrayList<>(Arrays.asList("","","","","")))
+                .answers(new ArrayList<>(Arrays.asList("", "", "", "", "")))
                 .role(UserRole.USER)
                 .build());
         userRepository.save(User.builder()
                 .userName("333dd")
                 .userId("333")
                 .userPw("333")
-                .answers(new ArrayList<>(Arrays.asList("","","","","")))
+                .answers(new ArrayList<>(Arrays.asList("", "", "", "", "")))
                 .role(UserRole.USER)
                 .build());
         userRepository.save(User.builder()
                 .userName("d555d")
                 .userId("555")
                 .userPw("5555")
-                .answers(new ArrayList<>(Arrays.asList("","","","","")))
+                .answers(new ArrayList<>(Arrays.asList("", "", "", "", "")))
                 .role(UserRole.ADMIN)
                 .build());
     }
-    public boolean isDuplicated (String userId){
+
+    public boolean isDuplicated(String userId) {
         return userRepository.existsById(userId);
     }
 
@@ -53,7 +55,8 @@ public class UserService {
 
     public List<String> login(LoginRequestDTO requestDTO) {
         Optional<User> byId = userRepository.findById(requestDTO.getUserId());
-        if (byId.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id " + requestDTO.getUserId() + " 가 없습니다");
+        if (byId.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id " + requestDTO.getUserId() + " 가 없습니다");
 
         String userPw = byId.get().getUserPw();
 
@@ -71,38 +74,40 @@ public class UserService {
         //쿠키에서 토큰 꺼내기
         String jwtTokenCookie = jwtTokenUtil.getTokenCookie(request);
 //        System.out.println(jwtTokenCookie);
-        if (jwtTokenCookie == null) {
-            return null;
+        if (jwtTokenCookie == null | isTokenInvalid(jwtTokenCookie, jwtTokenUtil.getSecretKey())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "refreshToken 이 잘못됐습니다.");
         }
-        if (isTokenInvalid(jwtTokenCookie, jwtTokenUtil.getSecretKey())) return null;
         return jwtTokenUtil.generateAccessToken(getLoginId(jwtTokenCookie, jwtTokenUtil.getSecretKey()));
     }
+
     public boolean isTokenInvalid(String token, String secretKey) {
         return jwtTokenUtil.isTokenInvalid(token, secretKey);
     }
-    public String getMyInfo(HttpServletRequest request) {
-        User user = getLoginUserByUserId(getLoginId(jwtTokenUtil.getTokenFromHeader(request), jwtTokenUtil.getSecretKey()));
-        return user.getUserName();
-    }
+
     public void signOut(HttpServletRequest request) {
         userRepository.deleteById(getLoginId(jwtTokenUtil.getTokenFromHeader(request), jwtTokenUtil.getSecretKey()));
     }
+
     public List<String> getAnswers(HttpServletRequest request) {
         String userId = getLoginId(jwtTokenUtil.getTokenFromHeader(request), jwtTokenUtil.getSecretKey());
         return userRepository.findById(userId).get().getAnswers();
     }
+
     @Transactional
     public void updateAnswers(List<String> answers, HttpServletRequest request) {
         String userId = getLoginId(jwtTokenUtil.getTokenFromHeader(request), jwtTokenUtil.getSecretKey());
         userRepository.updateAnswers(userId, answers);
     }
+
     public String getLoginId(String token, String secretKey) {
         return jwtTokenUtil.getClaims(token, secretKey).getSubject();
     }
+
     public User getLoginUserByUserId(String userId) {
         return userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유저가 없어용 - 토큰"));
     }
-    public ResponseCookie generateResponseCookie(String token, Integer maxAge){
+
+    public ResponseCookie generateResponseCookie(String token, Integer maxAge) {
         return ResponseCookie.from("refreshToken", token)
                 .httpOnly(true)
                 .secure(false) // https 사용시
