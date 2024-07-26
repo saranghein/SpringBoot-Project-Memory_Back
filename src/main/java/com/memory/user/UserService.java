@@ -53,12 +53,12 @@ public class UserService {
 
     public List<String> login(LoginRequestDTO requestDTO) {
         Optional<User> byId = userRepository.findById(requestDTO.getUserId());
-        if (byId.isEmpty()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "id " + requestDTO.getUserId() + " 가 없습니다");
+        if (byId.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id " + requestDTO.getUserId() + " 가 없습니다");
 
         String userPw = byId.get().getUserPw();
 
         if (!userPw.equals(requestDTO.getUserPw())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 틀려요");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호가 틀려요");
         }
 
         String accessToken = jwtTokenUtil.generateAccessToken(requestDTO.getUserId());
@@ -105,10 +105,10 @@ public class UserService {
     public ResponseCookie generateResponseCookie(String token, Integer maxAge){
         return ResponseCookie.from("refreshToken", token)
                 .httpOnly(true)
-                .secure(true) // https 사용시
+                .secure(false) // https 사용시
                 .path("/")
                 .maxAge(maxAge)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
     }
 
