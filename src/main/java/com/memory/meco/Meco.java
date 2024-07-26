@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -44,6 +43,4 @@ public class Meco {
     @Column(nullable = false, columnDefinition = "TEXT")
     private List<String> answers;
 
-
-    
 }

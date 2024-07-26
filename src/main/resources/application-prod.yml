@@ -1,18 +1,18 @@
 spring:
   datasource:
-    url: ${MYSQL_DATABASE_URL}
+    url: jdbc:mariadb://${MYSQL_DATABASE_URL}:3306/memory
     username: ${MYSQL_DATABASE_USERNAME}
     password: ${MYSQL_DATABASE_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: none
     properties:
       hibernate:
-        physical_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+#        globally_quoted_identifiers: true
         format_sql: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
-
-secrete: likelion
+        dialect: org.hibernate.dialect.MariaDBDialect
+        naming:
+          physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+#secrete: ${SPRING_SECURITY_SECRETE}
+#secrete: likelion

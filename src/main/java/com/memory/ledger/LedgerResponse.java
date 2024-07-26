@@ -51,24 +51,6 @@ public class LedgerResponse {
                 .build();
     }
 
-//    @Data
-//    @Builder
-//    @NoArgsConstructor
-//    @AllArgsConstructor
-//    public static class ContentItem {
-//        private String contents;
-//    }
-//
-//    private List<ContentItem> contentsList;
-//
-//    public static LedgerResponse fromLedgerList(List<Ledger> ledgers) {
-//        List<ContentItem> contentsList = ledgers.stream()
-//                .map(ledger -> new ContentItem(ledger.getContents()))
-//                .collect(Collectors.toList());
-//        return LedgerResponse.builder()
-//                .contentsList(contentsList)
-//                .build();
-//    }
     private List<String> contentsList;
     public static LedgerResponse fromLedgerList(List<Ledger> ledgers) {
         List<String> contentsList = ledgers.stream()

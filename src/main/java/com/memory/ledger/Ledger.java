@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ledger")
@@ -24,9 +23,9 @@ public class Ledger {
     emotionCategory : String
     category : String
     contents : String
-    takedTime : float
+    takedTime : Float
     userId : String
-    ledgerDate : LocalDateTime
+    ledgerDate : LocalDate
      */
 
         @Id

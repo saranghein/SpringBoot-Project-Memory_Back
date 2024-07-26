@@ -32,5 +32,5 @@ public class ListToStringConverter implements AttributeConverter<List<String>, S
         } catch (IOException e) {
             throw new RuntimeException("Failed to convert JSON string to list", e);
         }
-}
+    }
 }
