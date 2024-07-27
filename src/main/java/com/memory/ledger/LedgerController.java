@@ -50,7 +50,6 @@ public class LedgerController {
 
             }
         }catch (Exception e){
-
             return new ResponseEntity<>("저장에 실패했습니다.", HttpStatus.NOT_FOUND);
         }
     }
