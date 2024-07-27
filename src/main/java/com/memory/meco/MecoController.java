@@ -2,6 +2,7 @@ package com.memory.meco;
 
 import com.memory.user.User;
 import com.memory.user.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 import java.util.Optional;
-
+@Tag(name = "Meco", description = "메코의 질문 API")
 @RestController
 @RequestMapping("/api/v1/meco")
 public class MecoController {
@@ -25,7 +26,7 @@ public class MecoController {
     }
 
 
-    //질문 작성(작성 날짜 unique)
+    //질문 작성
     @PostMapping("/questions")
     ResponseEntity<String>postQuestions(@RequestBody MecoRequest mecoRequest, HttpServletRequest request) {
         try{
@@ -54,18 +55,20 @@ public class MecoController {
         }
     }
 
-    //해당 날짜의 답변들 조회(날짜 unique하게 처리 필요)
+    //해당 날짜의 답변들 조회
     @GetMapping("/questions/{date}")
     ResponseEntity<MecoResponse>getAnswersByDate(@PathVariable LocalDate date, HttpServletRequest request) {
+        try {
             // userId 검증
-            String userId=userService.getLoginIdFromRequest(request);
+            String userId = userService.getLoginIdFromRequest(request);
             User user = userService.getLoginUserByUserId(userId);
 
             Optional<MecoResponse> mecoAnswers = mecoService.getMecoByDateAndUserId(date, user);
+
             return mecoAnswers.map(response -> new ResponseEntity<>(response, HttpStatus.OK))
-                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-
+                    .orElseGet(() -> new ResponseEntity<>(new MecoResponse(), HttpStatus.OK));
+        }catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
-
-
 }

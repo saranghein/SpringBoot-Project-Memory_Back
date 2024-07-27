@@ -1,5 +1,7 @@
 package com.memory.user;
 
+import com.memory.ledger.Ledger;
+import com.memory.meco.Meco;
 import com.memory.user.dto.SignUpRequestDTO;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -21,6 +23,11 @@ public class User {
     private String userId;
     private String userPw;
     private String userName;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Ledger> ledgers= new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Meco> mecos = new ArrayList<>();
 
     @Convert(converter = StringListConverter.class)
     private List<String> answers;
@@ -32,7 +39,7 @@ public class User {
         this.userId = signUpRequestDTO.getUserId();
         this.userPw = signUpRequestDTO.getUserPw();
         this.userName = signUpRequestDTO.getUserName();
-        this.answers = new ArrayList<>(Arrays.asList("","","","",""));
+        this.answers = new ArrayList<>(Arrays.asList("", "", "", "", ""));
         this.role = UserRole.USER;
     }
 

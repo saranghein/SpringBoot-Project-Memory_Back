@@ -2,26 +2,22 @@ spring:
   profiles:
     active: ${profile}
 ---
-#spring:
-#  datasource:
-#    url: jdbc:mysql://localhost:3306/memory-schema?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-#    username: memory-user
-#    password: memory*1234
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#  h2:
-#    console:
-#      enabled: true
-#      settings:
-#        web-allow-others: true
-#      path: /h2-console
-#
-#  jpa:
-#    hibernate:
-#      ddl-auto: create
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        format_sql: true
-#        dialect: org.hibernate.dialect.MySQLDialect
-#
 secrete: likelion
+springdoc:
+  swagger-ui:
+    groups-order: DESC
+    tags-sorter: alpha
+    operations-sorter: method
+    disable-swagger-default-url: true
+    display-request-duration: true
+    defaultModelsExpandDepth: 2
+    defaultModelExpandDepth: 2
+  api-docs:
+    path: /api-docs
+  show-actuator: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  writer-with-default-pretty-printer: true
+  model-and-view-allowed: true
+  paths-to-match:
+    - /api/v1/**

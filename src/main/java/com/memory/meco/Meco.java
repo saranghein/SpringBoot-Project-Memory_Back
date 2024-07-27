@@ -43,6 +43,4 @@ public class Meco {
     @Column(nullable = false, columnDefinition = "TEXT")
     private List<String> answers;
 
-
-    
 }

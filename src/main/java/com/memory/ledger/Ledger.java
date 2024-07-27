@@ -23,9 +23,9 @@ public class Ledger {
     emotionCategory : String
     category : String
     contents : String
-    takedTime : float
+    takedTime : Float
     userId : String
-    ledgerDate : LocalDateTime
+    ledgerDate : LocalDate
      */
 
         @Id
