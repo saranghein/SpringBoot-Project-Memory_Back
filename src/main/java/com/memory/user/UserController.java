@@ -1,6 +1,7 @@
 package com.memory.user;
 
 import com.memory.user.dto.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -13,8 +14,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
-
-@Controller
+@Tag(name = "User", description = "유저 관련 API")
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
 public class UserController {

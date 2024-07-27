@@ -2,6 +2,7 @@ package com.memory.ledger;
 
 import com.memory.user.User;
 import com.memory.user.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 
 import java.util.List;
 import java.util.Optional;
-
+@Tag(name = "Ledger", description = "시간가계부 API")
 @RestController
 @RequestMapping("/api/v1/time-ledger")
 public class LedgerController {

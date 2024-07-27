@@ -2,6 +2,7 @@ package com.memory.meco;
 
 import com.memory.user.User;
 import com.memory.user.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 import java.util.Optional;
-
+@Tag(name = "Meco", description = "메코의 질문 API")
 @RestController
 @RequestMapping("/api/v1/meco")
 public class MecoController {
