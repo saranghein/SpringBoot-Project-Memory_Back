@@ -11,7 +11,7 @@ spring:
       hibernate:
 #        globally_quoted_identifiers: true
         format_sql: true
-        dialect: org.hibernate.dialect.MariaDBDialect
+#        dialect: org.hibernate.dialect.MariaDBDialect
         naming:
           physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
 #secrete: ${SPRING_SECURITY_SECRETE}

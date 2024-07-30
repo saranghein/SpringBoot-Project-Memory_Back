@@ -29,7 +29,7 @@ public class Meco {
 //    @Column(name = "userId", nullable = false)
 //    private String userId;
 
-    @Column(nullable = true,unique = true)
+    @Column(nullable = true)
     private LocalDate mecoDate;
 
     @Column(nullable = true)
