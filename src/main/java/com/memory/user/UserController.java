@@ -8,16 +8,21 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 @Tag(name = "User", description = "유저 관련 API")
 @RestController
@@ -36,7 +41,11 @@ public class UserController {
     })
     @GetMapping("/check-duplication")
     public ResponseEntity<Boolean> checkDuplication(@RequestParam @Schema(description = "유저 ID", example = "user123") String userId) {
-        return ResponseEntity.ok(userService.isDuplicated(userId));
+        try {
+            return ResponseEntity.ok(userService.isDuplicated(userId));
+        } catch (ResponseStatusException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id는 null이 아닙니다", e);
+        }
     }
 
     //회원가입
@@ -50,7 +59,7 @@ public class UserController {
                             schema = @Schema(implementation = String.class)))
     })
     @PostMapping("/signUp")
-    public ResponseEntity<String> signUp(@RequestBody @Schema(description = "회원가입 요청 데이터", implementation = SignUpRequestDTO.class) SignUpRequestDTO requestDTO) {
+    public ResponseEntity<String> signUp(@Valid @RequestBody @Schema(description = "회원가입 요청 데이터", implementation = SignUpRequestDTO.class) SignUpRequestDTO requestDTO) {
         try {
             userService.signUp(requestDTO);
             return ResponseEntity.ok("회원가입에 성공했습니다.");
@@ -58,7 +67,26 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원가입에 실패했습니다: " + e.getMessage());
         }
     }
+    @ControllerAdvice // signup시 id나 비밀번호 조건 만족 x / 중복 체크시 userid null 일 때 예외처리 클래스
+    public static class GlobalExceptionHandler {
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+            Map<String, String> errors = new HashMap<>();
+            ex.getBindingResult().getAllErrors().forEach((error) -> {
+                String fieldName = ((FieldError) error).getField();
+                String errorMessage = error.getDefaultMessage();
+                errors.put(fieldName, errorMessage);
+            });
+            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        }
+        @ExceptionHandler(ResponseStatusException.class)
+        public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException ex) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", ex.getReason());
+            return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        }
 
+    }
     //로그인
     @Operation(summary = "로그인", description = "유저 로그인을 수행합니다.")
     @ApiResponses(value = {

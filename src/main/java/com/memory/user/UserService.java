@@ -46,6 +46,9 @@ public class UserService {
     }
 
     public boolean isDuplicated(String userId) {
+        if (userId.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id가 비어있습니다.");
+        }
         return userRepository.existsById(userId);
     }
 
