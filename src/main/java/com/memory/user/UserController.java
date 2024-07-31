@@ -1,6 +1,12 @@
 package com.memory.user;
 
 import com.memory.user.dto.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -13,8 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
-
-@Controller
+@Tag(name = "User", description = "유저 관련 API")
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
 public class UserController {
@@ -22,14 +28,29 @@ public class UserController {
     private final UserService userService;
 
     //중복체크
+    @Operation(summary = "중복 체크", description = "유저 ID 중복 체크를 수행합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "중복 체크 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class)))
+    })
     @GetMapping("/check-duplication")
-    public ResponseEntity<Boolean> checkDuplication(@RequestParam String userId) {
+    public ResponseEntity<Boolean> checkDuplication(@RequestParam @Schema(description = "유저 ID", example = "user123") String userId) {
         return ResponseEntity.ok(userService.isDuplicated(userId));
     }
 
     //회원가입
+    @Operation(summary = "회원가입", description = "유저 회원가입을 수행합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원가입 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = "회원가입 실패",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class)))
+    })
     @PostMapping("/signUp")
-    public ResponseEntity<String> signUp(@RequestBody SignUpRequestDTO requestDTO) {
+    public ResponseEntity<String> signUp(@RequestBody @Schema(description = "회원가입 요청 데이터", implementation = SignUpRequestDTO.class) SignUpRequestDTO requestDTO) {
         try {
             userService.signUp(requestDTO);
             return ResponseEntity.ok("회원가입에 성공했습니다.");
@@ -39,8 +60,19 @@ public class UserController {
     }
 
     //로그인
+    @Operation(summary = "로그인", description = "유저 로그인을 수행합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "아이디나 비밀번호가 틀렸습니다.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "로그인 실패",
+                    content = @Content(mediaType = "application/json"))
+    })
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO requestDTO) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Schema(description = "로그인 요청 데이터", implementation = LoginRequestDTO.class)LoginRequestDTO requestDTO) {
         try {
             List<String> tokens = userService.login(requestDTO);
             ResponseCookie refreshTokenCookie = userService.generateResponseCookie(tokens.get(1), 21 * 24 * 60 * 60);
@@ -57,6 +89,17 @@ public class UserController {
     }
 
     //accessToken 재발급
+    @Operation(summary = "액세스 토큰 재발급", description = "새로운 액세스 토큰을 재발급받습니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "재발급 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AccessTokenResponseDTO.class))),
+            @ApiResponse(responseCode = "415", description = "Refresh token이 만료되었습니다.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AccessTokenResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "재발급 실패",
+                    content = @Content(mediaType = "application/json"))
+    })
     @PostMapping("/accessToken")
     public ResponseEntity<AccessTokenResponseDTO> reissueToken(HttpServletRequest request) {
         try {
@@ -70,6 +113,14 @@ public class UserController {
     }
 
     //meta-question get&patch
+    @Operation(summary = "메타 질문 조회", description = "메타 질문의 답변을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = MetaQuestionDTO.class))),
+            @ApiResponse(responseCode = "404", description = "조회 실패",
+                    content = @Content(mediaType = "application/json"))
+    })
     @GetMapping("/meta-questions")
     public ResponseEntity<MetaQuestionDTO> getMetaAnswers(HttpServletRequest request) {
         try {
@@ -79,8 +130,17 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "메타 질문 수정", description = "메타 질문의 답변을 수정합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "수정 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = "수정 실패",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class)))
+    })
     @PatchMapping("/meta-questions")
-    public ResponseEntity<String> patchMetaAnswers(@RequestBody MetaQuestionDTO metaQuestionDTO, HttpServletRequest request) {
+    public ResponseEntity<String> patchMetaAnswers(@RequestBody @Schema(description = "메타 질문 수정 데이터", implementation = MetaQuestionDTO.class) MetaQuestionDTO metaQuestionDTO, HttpServletRequest request) {
         try {
             userService.updateAnswers(metaQuestionDTO.getAnswers(), request);
             return ResponseEntity.ok("수정 완료");
@@ -91,6 +151,14 @@ public class UserController {
     }
 
     //로그아웃
+    @Operation(summary = "로그아웃", description = "유저 로그아웃을 수행합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그아웃 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = "로그아웃 실패",
+                    content = @Content(mediaType = "application/json"))
+    })
     @GetMapping("/logout")
     public ResponseEntity<String> logout() {
         try {
@@ -105,6 +173,14 @@ public class UserController {
     }
 
     //회원 탈퇴
+    @Operation(summary = "회원 탈퇴", description = "유저 회원 탈퇴를 수행합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원 탈퇴 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = "회원 탈퇴 실패",
+                    content = @Content(mediaType = "application/json"))
+    })
     @DeleteMapping("/account")
     public ResponseEntity<String> signOut(HttpServletRequest request) {
         try {
