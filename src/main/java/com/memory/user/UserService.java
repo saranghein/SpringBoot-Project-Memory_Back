@@ -113,7 +113,7 @@ public class UserService {
     public ResponseCookie generateResponseCookie(String token, Integer maxAge) {
         return ResponseCookie.from("refreshToken", token)
                 .httpOnly(true)
-                .secure(false) // https 사용시
+                .secure(true) // https 사용시
                 .path("/")
                 .maxAge(maxAge)
                 .sameSite("None")
