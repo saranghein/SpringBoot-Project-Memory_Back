@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,9 +33,14 @@ public class SwaggerConfig {
                         .scheme(BEARER_TOKEN_PREFIX)
                         .bearerFormat(securityJwtName));
 
+        // Define servers, including the one with HTTPS
+        Server httpsServer = new Server().url("https://memorymeta.store").description("Production server");
+
         return new OpenAPI()
+                .addServersItem(httpsServer) //  HTTPS
                 .addSecurityItem(securityRequirement)
                 .components(components);
+
     }
 
 }
