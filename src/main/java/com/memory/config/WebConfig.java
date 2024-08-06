@@ -16,7 +16,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://15.165.154.126:8080",
                         "https://15.165.154.126:8080",
                         "https://memorymeta.vercel.app",
-                        "https://memorymeta.store")//자원 공유를 허락할 Origin을 지정
+                        "https://memorymeta.store",
+                        "https://www.metamemory.site/")//자원 공유를 허락할 Origin을 지정
 //                .allowedOrigins("*")//자원 공유를 허락할 Origin을 지정
         .allowedMethods(
                 HttpMethod.GET.name(),
