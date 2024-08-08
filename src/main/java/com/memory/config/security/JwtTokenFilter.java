@@ -1,5 +1,7 @@
-package com.memory.user;
+package com.memory.config.security;
 
+import com.memory.user.User;
+import com.memory.user.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

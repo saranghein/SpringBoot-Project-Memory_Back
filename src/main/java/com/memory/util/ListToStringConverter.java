@@ -1,4 +1,4 @@
-package com.memory.meco;
+package com.memory.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

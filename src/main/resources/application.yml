@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: ${profile}
+    active: dev
 ---
 secrete: likelion
 springdoc:
