@@ -1,6 +1,7 @@
-package com.memory.ledger;
+package com.memory.ledger.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.memory.ledger.Ledger;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

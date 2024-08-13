@@ -1,5 +1,6 @@
-package com.memory.ledger;
+package com.memory.ledger.dto;
 
+import com.memory.ledger.Ledger;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -93,5 +95,23 @@ public class StatisticsResponse {
 
         @Schema(description = "감정 발생 횟수", example = "5")
         private int count;
+    }
+
+    public static StatisticsResponse of(
+            List<TimeSpent> timeSpent,
+            ComparisonWithLastMonth comparisonWithLastMonth,
+            List<EmotionSummary> emotionsSummary,
+            List<EmotionDetail> positiveEmotions,
+            List<EmotionDetail> neutralEmotions,
+            List<EmotionDetail> negativeEmotions
+    ) {
+        return StatisticsResponse.builder()
+                .timeSpent(timeSpent)
+                .comparisonWithLastMonth(comparisonWithLastMonth)
+                .emotionsSummary(emotionsSummary)
+                .positiveEmotions(positiveEmotions)
+                .neutralEmotions(neutralEmotions)
+                .negativeEmotions(negativeEmotions)
+                .build();
     }
 }

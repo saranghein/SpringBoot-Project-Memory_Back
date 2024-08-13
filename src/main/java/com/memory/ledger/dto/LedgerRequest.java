@@ -1,5 +1,6 @@
-package com.memory.ledger;
+package com.memory.ledger.dto;
 
+import com.memory.ledger.Ledger;
 import com.memory.user.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

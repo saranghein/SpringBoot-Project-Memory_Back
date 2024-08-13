@@ -22,13 +22,9 @@ public class Meco {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long mecoId;
 
-    // User 개발 후
     @ManyToOne
     @JoinColumn(name = "userId", nullable = false)
     private User user;
-
-//    @Column(name = "userId", nullable = false)
-//    private String userId;
 
     @Column(nullable = true)
     private LocalDate mecoDate;

@@ -47,13 +47,9 @@ public class Ledger {
         @Column(nullable = false)
         private Float takedTime;
 
-        //User 개발 후
         @ManyToOne
         @JoinColumn(name = "userId", nullable = false)
         private User user;
-
-//        @Column(name = "userId", nullable = false)
-//        private String userId;
 
         @Column(nullable = false)
         private LocalDate ledgerDate;
