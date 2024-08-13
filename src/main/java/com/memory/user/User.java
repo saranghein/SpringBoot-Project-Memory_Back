@@ -2,7 +2,8 @@ package com.memory.user;
 
 import com.memory.ledger.Ledger;
 import com.memory.meco.Meco;
-import com.memory.user.dto.SignUpRequestDTO;
+import com.memory.user.dto.SignUpRequest;
+import com.memory.util.ListToStringConverter;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -29,13 +30,13 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Meco> mecos = new ArrayList<>();
 
-    @Convert(converter = StringListConverter.class)
+    @Convert(converter = ListToStringConverter.class)
     private List<String> answers;
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    public User(SignUpRequestDTO signUpRequestDTO) {
+    public User(SignUpRequest signUpRequestDTO) {
         this.userId = signUpRequestDTO.getUserId();
         this.userPw = signUpRequestDTO.getUserPw();
         this.userName = signUpRequestDTO.getUserName();

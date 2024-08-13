@@ -1,7 +1,8 @@
 package com.memory.user;
 
-import com.memory.user.dto.LoginRequestDTO;
-import com.memory.user.dto.SignUpRequestDTO;
+import com.memory.config.security.JwtTokenUtil;
+import com.memory.user.dto.LoginRequest;
+import com.memory.user.dto.SignUpRequest;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -52,11 +53,11 @@ public class UserService {
         return userRepository.existsById(userId);
     }
 
-    public void signUp(SignUpRequestDTO requestDTO) {
+    public void signUp(SignUpRequest requestDTO) {
         userRepository.save(new User(requestDTO));
     }
 
-    public List<String> login(LoginRequestDTO requestDTO) {
+    public List<String> login(LoginRequest requestDTO) {
         Optional<User> byId = userRepository.findById(requestDTO.getUserId());
         if (byId.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id " + requestDTO.getUserId() + " 가 없습니다");

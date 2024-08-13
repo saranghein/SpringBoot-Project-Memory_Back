@@ -1,6 +1,7 @@
 package com.memory.meco;
 
 import com.memory.user.User;
+import com.memory.util.ListToStringConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

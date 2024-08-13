@@ -8,16 +8,16 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class MetaQuestionDTO {
+public class MetaQuestion {
     private List<String> answers;
 
     @Builder
     @JsonCreator
-    public MetaQuestionDTO(@JsonProperty("answers") List<String> answers) {
+    public MetaQuestion(@JsonProperty("answers") List<String> answers) {
         this.answers = answers;
     }
 
-    public static MetaQuestionDTO of(List<String> answers) {
-        return MetaQuestionDTO.builder().answers(answers).build();
+    public static MetaQuestion of(List<String> answers) {
+        return MetaQuestion.builder().answers(answers).build();
     }
 }

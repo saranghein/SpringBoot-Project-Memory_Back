@@ -1,4 +1,4 @@
-package com.memory.user;
+package com.memory.config.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
